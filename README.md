@@ -84,13 +84,31 @@ cargo build --release
 sudo pacman -S gtk4 wl-clipboard noto-fonts-emoji
 ```
 
-### On Debian/Ubuntu:
+>⚠️ You also need a running Hyprland setup for this to work!
 
+## 🖱️ CLI Commands
+
+HyprEmoji includes a command-line interface for configuration:
 ```bash
-sudo apt install libgtk-4-dev wl-clipboard fonts-noto-color-emoji
+# Show help
+hypremoji --help
+
+# Reset configuration to defaults (window follows cursor below)
+hypremoji reset
+
+# Configure window position behavior
+  # Window appears above cursor
+hypremoji init-in-mouse up
+
+  # Window appears below cursor (default)
+hypremoji init-in-mouse down
+
+  # Disables cursor follow uses last pinned position
+  # (or screen center if no pin set)
+hypremoji init-in-mouse none
 ```
 
->⚠️ You also need a running Hyprland setup for this to work!
+> 💡 **Tip:** By default, the window follows your cursor and appears below it. You can change this behavior anytime with the commands above, or use the 📌 pin button inside the app to set a fixed position.
 
 ## 🎨 Customization
 

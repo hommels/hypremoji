@@ -1,4 +1,4 @@
-use gtk::{gdk::Key, prelude::WidgetExt, EventControllerKey};
+use gtk::{gdk::Key, prelude::{EditableExt, WidgetExt}, EventControllerKey};
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use gtk::{
@@ -79,10 +79,27 @@ pub fn build_ui(app: &Application, cb_manager: ClipboardManager) {
     key_controller.connect_key_pressed(move |_controller, key, _keycode, _state| {
         if key == Key::Escape {
             window_clone.close();
-            gtk::glib::Propagation::Stop
-        } else {
-            gtk::glib::Propagation::Proceed
+            return gtk::glib::Propagation::Stop;
         }
+        
+        if let Some(unicode) = key.to_unicode() {
+            let search_input = search_input_rc.borrow();
+            if !search_input.has_focus() {
+                search_input.grab_focus();
+                
+                // Insertar el carácter manualmente
+                let current_text = search_input.text();
+                let cursor_pos = search_input.position();
+                let mut new_text = current_text.to_string();
+                new_text.insert(cursor_pos as usize, unicode);
+                search_input.set_text(&new_text);
+                search_input.set_position(cursor_pos + 1);
+                
+                return gtk::glib::Propagation::Stop;
+            }
+        }
+        
+        gtk::glib::Propagation::Proceed
     });
 
     window.add_controller(key_controller);

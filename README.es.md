@@ -85,13 +85,31 @@ cargo build --release
 sudo pacman -S gtk4 wl-clipboard noto-fonts-emoji
 ```
 
-### En Debian/Ubuntu:
+> ⚠️ También necesitas una sesión activa de Hyprland para que funcione.
 
+## 🖱️ Comandos CLI
+
+HyprEmoji incluye una interfaz de línea de comandos para configuración:
 ```bash
-sudo apt install libgtk-4-dev wl-clipboard fonts-noto-color-emoji
+# Mostrar ayuda
+hypremoji --help
+
+# Resetear configuración a valores predeterminados (ventana sigue al cursor abajo)
+hypremoji reset
+
+# Configurar comportamiento de posición de ventana
+  # La ventana aparece arriba del cursor
+hypremoji init-in-mouse up
+
+  # La ventana aparece debajo del cursor (predeterminado)
+hypremoji init-in-mouse down
+
+  # Deshabilita seguir al cursor, usa la última posición anclada
+  # (o el centro de la pantalla si no hay anclaje establecido)
+hypremoji init-in-mouse none
 ```
 
-> ⚠️ También necesitas una sesión activa de Hyprland para que funcione.
+> 💡 **Consejo:** Por defecto, la ventana sigue tu cursor y aparece debajo de él. Puedes cambiar este comportamiento en cualquier momento con los comandos anteriores, o usar el botón 📌 dentro de la app para establecer una posición fija.
 
 ## 🎨 Personalización
 

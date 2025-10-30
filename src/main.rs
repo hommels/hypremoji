@@ -1,38 +1,24 @@
-use std::env;
+use clap::Parser;
 use gtk::prelude::*;
 use gtk::Application;
 
 mod category;
-mod load_styles;
 mod services;
 mod ui;
 mod utils;
+mod cli;
+mod actions;
 
+use crate::cli::Cli;
 use crate::ui::build_ui;
-use load_styles::load_css;
+use crate::utils::load_css;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let cli = Cli::parse();
 
-    if args.len() > 1 {
-        match args[1].as_str() {
-            "--reset" | "--restore-defaults" => {
-                println!("Resetting Hypremoji configuration...");
-
-                if let Err(e) = utils::reset_config() {
-                    eprintln!("Error resetting configuration: {}", e);
-                    std::process::exit(1);
-                } else {
-                    println!("Configuration reset successfully!");
-                    std::process::exit(0);
-                }
-            }
-            _ => {
-                eprintln!("Unknown option: {}", args[1]);
-                eprintln!("Usage: hypremoji [--reset]");
-                std::process::exit(1);
-            }
-        }
+    if let Some(command) = &cli.command {
+        actions::handle_command(command);
+        return
     }
 
     let cb_manager = utils::get_clipboard_manager();

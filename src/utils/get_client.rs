@@ -7,6 +7,7 @@ pub struct Client {
     pub focus_history_id: u32,
     #[serde(rename = "initialTitle")]
     pub initial_title: String,
+    pub class: String,
     pub at: (i32, i32),
     pub size: (i32, i32),
 }

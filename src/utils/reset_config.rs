@@ -23,6 +23,9 @@ pub fn reset_config() -> Result<(), Box<dyn std::error::Error>> {
     reset_hypremoji_rule_for_hyprland(&config_dir_path)?;
     println!("Reset Hyprland rule to default.");
 
+    reset_paste_config(&config_dir_path)?;
+    println!("Reset paste config to default.");
+
     ensure_hyprland_conf_includes_hypremoji()?;
 
     println!("Hypremoji configuration has been reset to default.");
@@ -68,6 +71,28 @@ pub fn reset_hypremoji_rule_for_hyprland(config_dir_path: &Path) -> Result<(), B
         return Err(Box::from(format!(
             "FILE NOT FOUND: Don't exist default Hyprland rule in: '{}'",
             default_rule_path.display()
+        )));
+    }
+    Ok(())
+}
+
+pub fn reset_paste_config(config_dir_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    let paste_config_path = config_dir_path.join("paste_config.json");
+    let default_paste_config_path = get_base_path()?.join("paste_config.json");
+    
+    if default_paste_config_path.exists() {
+        fs::copy(&default_paste_config_path, &paste_config_path).map_err(|e| {
+            format!(
+                "Failed to copy default paste config from '{}' to '{}': {}",
+                default_paste_config_path.display(),
+                paste_config_path.display(),
+                e
+            )
+        })?;
+    } else {
+        return Err(Box::from(format!(
+            "FILE NOT FOUND: Don't exist default paste config in: '{}'",
+            default_paste_config_path.display()
         )));
     }
     Ok(())

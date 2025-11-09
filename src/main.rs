@@ -8,6 +8,7 @@ mod ui;
 mod utils;
 mod cli;
 mod actions;
+mod config;
 
 use crate::cli::Cli;
 use crate::ui::build_ui;

@@ -1,20 +1,20 @@
 use std::{cell::RefCell, process::Command, rc::Rc, thread, time::Duration};
 
-// use arboard::Clipboard; // <-- If don't work, try with that
 use chrono::Utc;
 
-use crate::utils::get_last_client;
+use crate::{config::load_paste_config, utils::get_last_client};
 
 #[derive(Clone)]
 pub struct ClipboardManager {
     focused_window_id: String,
+    focused_window_class: String,
     chosen_emoji: Rc<RefCell<Option<String>>>,
 }
 
 impl ClipboardManager {
     pub fn send_emoji_to_focused_window(&self) {
         if let Some(emoji) = self.chosen_emoji.borrow().as_ref() {
-            send_emoji(emoji, &self.focused_window_id);
+            send_emoji(emoji, &self.focused_window_id, &self.focused_window_class);
         }
     }
     pub fn set_chosen_emoji(&self, emoji: String) {
@@ -24,24 +24,22 @@ impl ClipboardManager {
 
 #[derive(Debug)]
 struct OriginalClipboardContent {
-    content: Option<String>, // If it's text, this is just the content; if it's an image, it's the path to a temp file
+    content: Option<String>,
     mime_type: String,
 }
 
 pub fn get_clipboard_manager() -> ClipboardManager {
-    let address = get_last_client().address;
+    let last_client = get_last_client();
     let chosen_emoji: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
 
     ClipboardManager {
-        focused_window_id: address,
+        focused_window_id: last_client.address,
+        focused_window_class: last_client.class,
         chosen_emoji,
     }
 }
 
-fn send_emoji(emoji: &str, window_id: &str) {
-    // // If don't work, try with that
-    // let mut clipboard = Clipboard::new().expect("No se pudo acceder al clipboard");
-
+fn send_emoji(emoji: &str, window_id: &str, window_class: &str) {
     // 1. Try to save the original clipboard content
     let original_clipboard_content = save_original_clipboard_content();
     
@@ -57,22 +55,24 @@ fn send_emoji(emoji: &str, window_id: &str) {
         eprintln!("Failed to copy emoji to clipboard: {}", e);
     }
     
-    // // If don't work, try with that
-    // clipboard
-    //     .set_text(emoji.to_string())
-    //     .expect("No se pudo poner el emoji en el clipboard");
-
     // 3. Insert the emoji into the previously focused window
-    let command_str = format!(
-        "hyprctl dispatch sendshortcut CONTROL, V, address:{}",
-        window_id
-    );
+    let command_str = if load_paste_config().needs_shift_for_paste(window_class) {
+        format!(
+            "hyprctl dispatch sendshortcut CONTROL SHIFT, V, address:{}",
+            window_id
+        )
+    } else {
+        format!(
+            "hyprctl dispatch sendshortcut CONTROL, V, address:{}",
+            window_id
+        )
+    };
 
     Command::new("sh")
         .arg("-c")
         .arg(&command_str)
         .output()
-        .expect("Falló el hyprctl command");
+        .expect("Failed hyprctl command");
 
     // 4. Wait briefly to ensure Hyprland pastes correctly
     thread::sleep(Duration::from_millis(100));
@@ -98,8 +98,6 @@ fn save_original_clipboard_content() -> OriginalClipboardContent {
             mime_type: "empty".to_string(),
         };
     }
-    // stdout.to_string();
-    // println!("{}", stdout.to_string());
 
     let mime_type = if stdout.contains("image/png") {
         "image/png"

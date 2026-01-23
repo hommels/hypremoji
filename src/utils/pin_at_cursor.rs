@@ -20,12 +20,17 @@ pub fn set_pin_at_cursor(position: &MousePosition) -> Result<(), Box<dyn std::er
                 continue;
             }
 
+            // Skip all move cursor rules (always remove them)
+            if trimmed.starts_with("windowrule = move (cursor_x") 
+                || trimmed.starts_with("# windowrule = move (cursor_x") {
+                continue;
+            }
+
             match position {
                 MousePosition::None => {
-                    // Uncomment regular move rules
-                    if trimmed.starts_with("# windowrulev2 = move") 
-                        && !trimmed.contains("cursor")
-                        && trimmed.contains("title:^(HyprEmoji)$") {
+                    // Uncomment static move rules
+                    if trimmed.starts_with("# windowrule = move") 
+                        && trimmed.contains("match:title ^(HyprEmoji)$") {
                         let uncommented = trimmed.trim_start_matches("# ").to_string();
                         lines.push(uncommented);
                     } else {
@@ -33,10 +38,9 @@ pub fn set_pin_at_cursor(position: &MousePosition) -> Result<(), Box<dyn std::er
                     }
                 }
                 _ => {
-                    // Comment regular move rules
-                    if trimmed.starts_with("windowrulev2 = move") 
-                        && !trimmed.contains("cursor")
-                        && trimmed.contains("title:^(HyprEmoji)$") {
+                    // Comment static move rules
+                    if trimmed.starts_with("windowrule = move") 
+                        && trimmed.contains("match:title ^(HyprEmoji)$") {
                         lines.push(format!("# {}", trimmed));
                     } else {
                         lines.push(line);
@@ -48,8 +52,8 @@ pub fn set_pin_at_cursor(position: &MousePosition) -> Result<(), Box<dyn std::er
         // Add cursor rule if needed
         if *position != MousePosition::None {
             let cursor_rule = match position {
-                MousePosition::Up => "windowrulev2 = move cursor -50% -95%, title:^(HyprEmoji)$",
-                MousePosition::Down => "windowrulev2 = move cursor -50% -5%, title:^(HyprEmoji)$",
+                MousePosition::Up => "windowrule = move (cursor_x-(window_w*0.5)) (cursor_y-(window_h*0.95)), match:title ^(HyprEmoji)$",
+                MousePosition::Down => "windowrule = move (cursor_x-(window_w*0.5)) (cursor_y-(window_h*0.05)), match:title ^(HyprEmoji)$",
                 _ => unreachable!(),
             };
             lines.push(cursor_rule.to_string());

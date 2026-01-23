@@ -60,14 +60,12 @@ cd HyprEmoji
 3. ⚙️ Add this to your `hyprland.conf`:
 
 ```conf
-# Env for build
-$hypremoji = ~/path/to/project/target/release/hypremoji
-
 # SUPER + PERIOD to open Hypremoji
-bind = Super, period, exec, $hypremoji
+bind = SUPER, period, exec, hypremoji
 
 # Window rules for HyprEmoji
-windowrulev2 = float, title:^(HyprEmoji)$
+windowrule = float true, match:title ^(HyprEmoji)$ 
+windowrule = move (cursor_x-(window_w*0.5)) (cursor_y-(window_h*0.05)), match:title ^(HyprEmoji)$
 ```
 
 4. 🛠️ Build it:

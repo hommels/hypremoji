@@ -18,8 +18,8 @@ pub fn save_current_window_state() -> Result<(), Box<dyn std::error::Error>> {
         at_x, at_y, size_x, size_y
     );
 
-    let new_position_rule = format!("windowrulev2 = move {} {}, title:^(HyprEmoji)$", at_x, at_y);
-    let new_size_rule = format!("windowrulev2 = size {} {}, title:^(HyprEmoji)$", size_x, size_y);
+    let new_position_rule = format!("windowrule = move {} {}, match:title ^(HyprEmoji)$", at_x, at_y);
+    let new_size_rule = format!("windowrule = size {} {}, match:title ^(HyprEmoji)$", size_x, size_y);
 
     update_position_and_size(&new_position_rule, &new_size_rule)
 }
@@ -42,23 +42,22 @@ fn update_position_and_size(
             let trimmed = line.trim();
 
             // Replace size rule
-            if trimmed.starts_with("windowrulev2 = size") 
-                && trimmed.contains("title:^(HyprEmoji)$") {
+            if trimmed.starts_with("windowrule = size") 
+                && trimmed.contains("match:title ^(HyprEmoji)$") {
                 lines.push(size_rule.to_string());
                 found_size = true;
                 continue;
             }
 
-            // Skip all move cursor rules
-            if trimmed.starts_with("windowrulev2 = move cursor") 
-                || trimmed.starts_with("# windowrulev2 = move cursor") {
+            // Skip all move cursor rules (always remove them)
+            if trimmed.starts_with("windowrule = move (cursor_x") 
+                || trimmed.starts_with("# windowrule = move (cursor_x") {
                 continue;
             }
 
             // Replace move rule (commented or not)
-            if (trimmed.starts_with("windowrulev2 = move") || trimmed.starts_with("# windowrulev2 = move"))
-                && !trimmed.contains("cursor")
-                && trimmed.contains("title:^(HyprEmoji)$") {
+            if (trimmed.starts_with("windowrule = move") || trimmed.starts_with("# windowrule = move"))
+                && trimmed.contains("match:title ^(HyprEmoji)$") {
                 lines.push(position_rule.to_string());
                 found_position = true;
                 continue;

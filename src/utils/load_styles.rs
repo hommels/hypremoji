@@ -25,19 +25,16 @@ pub fn load_css(custom_css_path: Option<&str>) -> Result<(), Box<dyn std::error:
         user_main_css_path
     };
 
-    provider.load_from_string(&fs::read_to_string(&css_path).unwrap_or_else(|_| {
-        eprintln!(
-            "Failed to read style file from '{}'. Using built-in default CSS instead.",
-            css_path.display()
-        );
-        String::from(
-            "/* Default window body and text color */ \
-             window { background-color: #282A36; color: #F8F8F2; font-family: Inter, sans-serif; }",
-        )
-    }));
+    if css_path.exists() {
+        // En lugar de leerlo a string, pasamos la ruta directamente
+        provider.load_from_path(css_path.to_str().unwrap());
+    } else {
+        // Solo usas string para el fallback por defecto
+        provider.load_from_string("window { background-color: #282A36; }");
+    }
 
     gtk::style_context_add_provider_for_display(
-        &Display::default().expect("Could not connect to a display."),
+        &Display::default().ok_or("No display found")?,
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );

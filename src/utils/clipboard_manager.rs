@@ -2,19 +2,20 @@ use std::{cell::RefCell, process::Command, rc::Rc, thread, time::Duration};
 
 use chrono::Utc;
 
-use crate::{config::load_paste_config, utils::get_last_client};
+use crate::{config::{paste_config::AppConfig}, utils::get_last_client};
 
 #[derive(Clone)]
 pub struct ClipboardManager {
     focused_window_id: String,
     focused_window_class: String,
     chosen_emoji: Rc<RefCell<Option<String>>>,
+    app_config: AppConfig,
 }
 
 impl ClipboardManager {
     pub fn send_emoji_to_focused_window(&self) {
         if let Some(emoji) = self.chosen_emoji.borrow().as_ref() {
-            send_emoji(emoji, &self.focused_window_id, &self.focused_window_class);
+            send_emoji(emoji, &self.focused_window_id, &self.focused_window_class, &self.app_config);
         }
     }
     pub fn set_chosen_emoji(&self, emoji: String) {
@@ -28,7 +29,7 @@ struct OriginalClipboardContent {
     mime_type: String,
 }
 
-pub fn get_clipboard_manager() -> ClipboardManager {
+pub fn get_clipboard_manager(config: &AppConfig) -> ClipboardManager {
     let last_client = get_last_client();
     let chosen_emoji: Rc<RefCell<Option<String>>> = Rc::new(RefCell::new(None));
 
@@ -36,10 +37,11 @@ pub fn get_clipboard_manager() -> ClipboardManager {
         focused_window_id: last_client.address,
         focused_window_class: last_client.class,
         chosen_emoji,
+        app_config: config.clone(),
     }
 }
 
-fn send_emoji(emoji: &str, window_id: &str, window_class: &str) {
+fn send_emoji(emoji: &str, window_id: &str, window_class: &str, config: &AppConfig) {
     // 1. Try to save the original clipboard content
     let original_clipboard_content = save_original_clipboard_content();
     
@@ -56,7 +58,7 @@ fn send_emoji(emoji: &str, window_id: &str, window_class: &str) {
     }
     
     // 3. Insert the emoji into the previously focused window
-    let command_str = if load_paste_config().needs_shift_for_paste(window_class) {
+    let command_str = if config.needs_shift_for_paste(window_class) {
         format!(
             "hyprctl dispatch sendshortcut CONTROL SHIFT, V, address:{}",
             window_id

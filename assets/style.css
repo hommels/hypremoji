@@ -7,11 +7,11 @@
   --bg-col: #0F0F0F;
   --input-text-col: #FFFFFF;
   --btn-list-col: #181818;
-  --entry-unfocus: #c41313;
   --btn-list-col-hover: #272727;
   --btn-list-col-hover-glow: #27272777;
   --btn-nav-col: #3E3E3E;
   --btn-nav-col-hover: #0F0F0F;
+  --error: #c41313;
 
   --emoji-font: "Noto Color Emoji";
 }
@@ -31,6 +31,8 @@ window {
   /* margin: 0 20px; */
   padding: 0 5px;
   border-radius: 10px;
+  color: var(--primary-col);
+  -gtk-icon-size: 24px; 
 }
 
 .generic-btn:hover{
@@ -126,4 +128,82 @@ entry {
 }
 .emoji-item:focus {
   background-color: var(--btn-list-col-hover);
+}
+
+
+.toast-container {
+  background-color: var(--btn-list-col);
+  border-radius: 10px;
+  padding: 5px 15px;
+  margin: 0 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--primary-col);
+  
+  transition: all 0.3s ease-in-out;
+  transform: scale(0.0000000001);
+}
+
+.toast-container.error {
+  border: 1px solid var(--error);
+}
+
+.toast-label {
+  color: white;
+  font-weight: 700;
+}
+
+.show-toast {
+  transform: scale(1);
+
+  animation-name: boingCombo;
+  animation-duration: 5s;
+  animation-fill-mode: both;
+}
+
+@keyframes boingCombo {
+  0% {
+    opacity: 0;
+    transform: scale3d(.3,.3,.3);
+  }
+
+  0.6% {
+    transform: scale3d(1.1,1.1,1.1);
+  }
+
+  1.2% {
+    transform: scale3d(.9,.9,.9);
+  }
+
+  1.8% {
+    opacity: 1;
+    transform: scale3d(1.03,1.03,1.03);
+  }
+
+  2.4% {
+    transform: scale3d(.97,.97,.97);
+  }
+
+  3% {
+    opacity: 1;
+    transform: scale3d(1,1,1);
+  }
+
+  90% {
+    opacity: 1;
+    transform: scale3d(1,1,1);
+  }
+
+  92% {
+    transform: scale3d(.9,.9,.9);
+  }
+
+  95%, 95.5% {
+    opacity: 1;
+    transform: scale3d(1.1,1.1,1.1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale3d(.3,.3,.3);
+  }
 }

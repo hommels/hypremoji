@@ -6,13 +6,14 @@ use gtk::{
 };
 
 use crate::{
-    category::Category,
-    services::{get_search_service, setup_keyboard_controller},
-    ui::{create_category_nav, create_emoji_grid_section, create_top_bar},
-    utils::{clipboard_manager::ClipboardManager, load_emoji_for_category},
+    category::Category, config::paste_config::AppConfig, services::{get_search_service, setup_keyboard_controller}, ui::{create_category_nav, create_emoji_grid_section, create_top_bar, toast::Toast}, utils::{clipboard_manager::ClipboardManager, load_emoji_for_category}
 };
 
-pub fn build_ui(app: &Application, cb_manager: ClipboardManager) {
+pub fn build_ui(
+    app: &Application,
+    cb_manager: ClipboardManager,
+    config: &AppConfig
+) {
     let window = ApplicationWindow::builder()
         .application(app)
         .title("HyprEmoji")
@@ -28,6 +29,20 @@ pub fn build_ui(app: &Application, cb_manager: ClipboardManager) {
 
     let main_box = BoxGtk::new(gtk::Orientation::Vertical, 0);
     window.set_child(Some(&main_box));
+    
+    // //////////////////
+
+    let overlay = gtk::Overlay::new();
+    
+    let main_box = BoxGtk::new(gtk::Orientation::Vertical, 0);
+    overlay.set_child(Some(&main_box));
+    
+    let toast = Toast::new();
+    overlay.add_overlay(toast.widget());
+    
+    window.set_child(Some(&overlay)); 
+
+    // /////////////////////////
 
     let (all_emojis_by_category, first_cat) = match load_emoji_for_category() {
         Ok((map, first_cat)) => (Rc::new(RefCell::new(map)), first_cat),
@@ -66,6 +81,8 @@ pub fn build_ui(app: &Application, cb_manager: ClipboardManager) {
         toggle_nav_class.clone(),
         search_service.initiate_debounced_search_fn.clone(),
         search_input_rc.clone(),
+        config,
+        &toast,
     );
 
     main_box.append(&search_section);

@@ -5,7 +5,7 @@ use gtk::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{category::Category, ui::create_save_window_state_button};
+use crate::{category::Category, config::paste_config::AppConfig, ui::{create_pin_btn, toast::Toast}};
 
 pub fn create_top_bar(
     global_margin: i32,
@@ -14,6 +14,8 @@ pub fn create_top_bar(
     toggle_nav_class: Rc<dyn Fn(bool)>,
     initiate_debounced_search_fn: Rc<std::boxed::Box<dyn Fn(std::string::String)>>,
     search_input_global: Rc<RefCell<Entry>>,
+    config: &AppConfig,
+    toast: &Toast
 ) -> BoxGtk {
     let container = BoxGtk::new(gtk::Orientation::Horizontal, 8);
     container.set_margin_start(global_margin);
@@ -32,8 +34,8 @@ pub fn create_top_bar(
     );
     container.append(&search_input);
 
-    let save_window_state_btn = create_save_window_state_button();
-    container.append(&save_window_state_btn);
+    let pin_btn = create_pin_btn(config, toast);
+    container.append(&pin_btn);
 
     container
 }

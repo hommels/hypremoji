@@ -18,4 +18,4 @@ pub use path_utils::{get_assets_base_path, get_config_dir, get_base_path};
 pub use reset_config::{reset_config, reset_css};
 pub use load_styles::load_css;
 pub use pin_at_cursor::set_pin_at_cursor;
-pub use pin_at_point::save_current_window_state;
+pub use pin_at_point::change_pin_type;

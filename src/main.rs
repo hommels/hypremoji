@@ -12,7 +12,9 @@ mod actions;
 mod config;
 
 use crate::cli::Cli;
+use crate::config::load_config;
 use crate::ui::build_ui;
+use crate::ui::generic_btn::register_custom_icons;
 use crate::utils::load_css;
 
 fn main() {
@@ -22,8 +24,9 @@ fn main() {
         actions::handle_command(command);
         return
     }
+    let app_config = load_config();
 
-    let cb_manager = utils::get_clipboard_manager();
+    let cb_manager = utils::get_clipboard_manager(&app_config);
 
     let app = Application::builder()
         .application_id("dev.musagy.hypremoji")
@@ -38,7 +41,8 @@ fn main() {
 
     let cb_manager_clone = cb_manager.clone();
     app.connect_activate(move |app| {
-        build_ui(app, cb_manager_clone.clone());
+        register_custom_icons().expect("Failed to register icons");
+        build_ui(app, cb_manager_clone.clone(), &app_config);
     });
     let gtk_args: Vec<String> = env::args().take(1).collect();
     app.run_with_args(&gtk_args);

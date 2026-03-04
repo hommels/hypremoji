@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{path::PathBuf};
 
 use gtk::{gdk::Display, CssProvider};
 
@@ -26,10 +26,8 @@ pub fn load_css(custom_css_path: Option<&str>) -> Result<(), Box<dyn std::error:
     };
 
     if css_path.exists() {
-        // En lugar de leerlo a string, pasamos la ruta directamente
         provider.load_from_path(css_path.to_str().unwrap());
     } else {
-        // Solo usas string para el fallback por defecto
         provider.load_from_string("window { background-color: #282A36; }");
     }
 

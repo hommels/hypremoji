@@ -126,7 +126,6 @@ fn save_original_clipboard_content() -> OriginalClipboardContent {
 
     let full_path = format!("{}{}", path, extension);
 
-    // Create file with 600 permissions before writing
     if let Err(e) = OpenOptions::new()
         .write(true)
         .create(true)

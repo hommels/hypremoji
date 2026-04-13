@@ -1,4 +1,5 @@
-use std::{cell::RefCell, process::Command, rc::Rc, thread, time::Duration};
+use std::{cell::RefCell, fs::OpenOptions, process::Command, rc::Rc, thread, time::Duration};
+use std::os::unix::fs::OpenOptionsExt;
 
 use chrono::Utc;
 
@@ -124,6 +125,21 @@ fn save_original_clipboard_content() -> OriginalClipboardContent {
     };
 
     let full_path = format!("{}{}", path, extension);
+
+    // Create file with 600 permissions before writing
+    if let Err(e) = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .mode(0o600)
+        .open(&full_path)
+    {
+        eprintln!("Failed to create temp file: {}", e);
+        return OriginalClipboardContent {
+            content: None,
+            mime_type: mime_type.to_string(),
+        };
+    }
+
     let command_str = format!("wl-paste --type {} > {}", mime_flag, full_path);
     let output = Command::new("sh")
         .arg("-c")
@@ -148,10 +164,16 @@ fn set_element_to_clipboard(occ: OriginalClipboardContent) {
         "<"
     };
 
-    let command_str = format!("wl-copy {} {}", prefix, occ.content.unwrap_or_default());
+    let path = occ.content.unwrap_or_default();
+    let command_str = format!("wl-copy {} {}", prefix, path);
     Command::new("sh")
         .arg("-c")
         .arg(command_str)
         .output()
         .expect("Failed to load content to clipboard");
+
+    // Cleanup the temporary file
+    if !path.is_empty() {
+        let _ = std::fs::remove_file(&path);
+    }
 }
